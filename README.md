@@ -9,3 +9,6 @@ Repositório com exercícios e projetos desenvolvidos durante minha formação e
 - JavaScript
 
 Em constante atualização.
+## Projeto – Página Pessoal
+Projeto front-end desenvolvido com HTML, CSS e JavaScript, contendo estrutura de página, estilização e interatividade básica.
+
