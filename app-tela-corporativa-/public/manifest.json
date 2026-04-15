@@ -1,0 +1,19 @@
+{
+  "id": "com.nexdisplay.app",
+  "name": "NEXDISPLAY - Gestão Inteligente",
+  "short_name": "NEXDISPLAY",
+  "description": "Plataforma de gestão inteligente de displays, painéis e widgets corporativos",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0B1220",
+  "theme_color": "#2563EB",
+  "orientation": "any",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

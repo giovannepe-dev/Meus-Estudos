@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1200">
+<title>CriArt SaaS — Criativo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #050810;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    padding: 48px 24px;
+    min-height: 100vh;
+  }
+
+  /* ── CARD PRINCIPAL (1080×1350 → visualizar em 720×900) ── */
+  .card {
+    width: 720px;
+    min-height: 900px;
+    background: linear-gradient(145deg, #0b0f1c 0%, #0e1428 40%, #080d1a 100%);
+    border: 1px solid rgba(99,130,255,0.18);
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 48px 52px 44px;
+  }
+
+  /* glows de fundo */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 15% 0%, rgba(99,130,255,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(160,80,255,0.18) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(30,180,120,0.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── BADGE TOPO ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(99,130,255,0.12);
+    border: 1px solid rgba(99,130,255,0.3);
+    border-radius: 999px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #a0b4ff;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 28px;
+    position: relative;
+  }
+  .badge-dot {
+    width: 7px; height: 7px;
+    background: #6382ff;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #6382ff;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── HEADLINE ── */
+  .headline {
+    font-family: 'Syne', 'Inter', sans-serif;
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .headline span {
+    background: linear-gradient(90deg, #6382ff 0%, #a264ff 50%, #4ecdc4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.6;
+    max-width: 500px;
+    margin-bottom: 36px;
+    position: relative;
+  }
+
+  /* ── MOCKUPS ── */
+  .mockups-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-end;
+    margin-bottom: 36px;
+    position: relative;
+  }
+
+  .phone {
+    border-radius: 18px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    background: #0a0e1c;
+    flex-shrink: 0;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .phone-main { width: 200px; height: 340px; }
+  .phone-sm   { width: 160px; height: 270px; }
+
+  /* Vitrine mockup */
+  .m-vitrine {
+    background: linear-gradient(160deg, #0d1627 0%, #0a1120 100%);
+    padding: 14px 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .m-hero {
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1a2a4a 0%, #0f1a35 100%);
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid rgba(99,130,255,0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  .m-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(99,130,255,0.3) 0%, transparent 70%);
+  }
+  .m-hero-title { font-size: 8px; font-weight: 800; color: #fff; letter-spacing: -0.02em; position:relative; }
+  .m-hero-sub { font-size: 6px; color: rgba(255,255,255,0.5); position:relative; }
+  .m-cats { display: flex; gap: 5px; flex-wrap: wrap; }
+  .m-cat {
+    font-size: 5.5px; font-weight: 700; padding: 3px 7px; border-radius: 6px;
+    background: rgba(99,130,255,0.12); color: #a0b4ff; border: 1px solid rgba(99,130,255,0.2);
+  }
+  .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; flex: 1; }
+  .m-prod {
+    border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .m-prod-img { height: 44px; background: linear-gradient(135deg, #1a2040 0%, #0e1628 100%); display:flex; align-items:center; justify-content:center; font-size:14px; }
+  .m-prod-info { padding: 4px 5px; }
+  .m-prod-nome { font-size: 5px; font-weight: 600; color: #c0c8e8; line-height: 1.3; }
+
+  /* Catálogo mockup */
+  .m-catalogo {
+    background: #09111f;
+    padding: 12px 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .m-search {
+    border-radius: 7px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    padding: 5px 8px; font-size: 5.5px; color: rgba(255,255,255,0.3); display:flex; align-items:center; gap:4px;
+  }
+  .m-search-icon { font-size: 7px; }
+  .m-list { display: flex; flex-direction: column; gap: 5px; flex: 1; }
+  .m-item {
+    border-radius: 7px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+    padding: 6px 7px; display: flex; gap: 6px; align-items: center;
+  }
+  .m-item-img { width: 28px; height: 28px; border-radius: 5px; background: linear-gradient(135deg, #1e3060, #0f1e40); display:flex; align-items:center; justify-content:center; font-size:10px; flex-shrink:0; }
+  .m-item-info { flex: 1; }
+  .m-item-nome { font-size: 5.5px; font-weight: 600; color: #d0d8f0; margin-bottom: 2px; }
+  .m-item-cat { font-size: 4.5px; color: rgba(160,180,255,0.6); }
+
+  /* Papelaria mockup */
+  .m-papelaria {
+    background: #09111f;
+    padding: 12px 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .m-pap-title { font-size: 8px; font-weight: 800; color: #fff; margin-bottom: 2px; }
+  .m-pap-sub { font-size: 5px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+  .m-pap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; flex: 1; }
+  .m-kit {
+    border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+  }
+  .m-kit-img { height: 50px; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .m-kit-nome { padding: 4px 5px; font-size: 5px; font-weight: 600; color: #c0c8e8; }
+
+  /* Orçamento mockup */
+  .m-orc {
+    background: #09111f;
+    padding: 12px 10px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .m-orc-header { font-size: 7px; font-weight: 800; color: #fff; }
+  .m-orc-item {
+    border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+    padding: 5px 7px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .m-orc-nome { font-size: 5px; color: #c0c8e8; font-weight: 600; }
+  .m-orc-val { font-size: 5.5px; color: #6bde9a; font-weight: 700; }
+  .m-orc-total {
+    border-radius: 6px; background: linear-gradient(90deg, rgba(99,130,255,0.15), rgba(160,100,255,0.15));
+    border: 1px solid rgba(99,130,255,0.25);
+    padding: 7px 9px; display: flex; justify-content: space-between; align-items: center; margin-top: 2px;
+  }
+  .m-orc-total-label { font-size: 6px; font-weight: 700; color: #a0b4ff; }
+  .m-orc-total-val { font-size: 8px; font-weight: 800; color: #fff; }
+  .m-orc-btn {
+    border-radius: 6px; background: linear-gradient(90deg, #6382ff, #a264ff);
+    padding: 6px; text-align: center; font-size: 5.5px; font-weight: 700; color: #fff; margin-top: 4px;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 32px;
+    position: relative;
+  }
+  .feat {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+  }
+  .feat-icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    flex-shrink: 0;
+  }
+  .feat-icon.blue { background: rgba(99,130,255,0.15); }
+  .feat-icon.purple { background: rgba(160,100,255,0.15); }
+  .feat-icon.green { background: rgba(50,200,120,0.13); }
+  .feat-icon.orange { background: rgba(255,140,60,0.13); }
+  .feat-icon.teal { background: rgba(78,205,196,0.13); }
+  .feat-icon.pink { background: rgba(255,100,150,0.12); }
+  .feat-text {}
+  .feat-title { font-size: 13px; font-weight: 700; color: #e8eeff; margin-bottom: 3px; }
+  .feat-desc { font-size: 11.5px; color: rgba(255,255,255,0.4); line-height: 1.5; }
+
+  /* ── RODAPÉ ── */
+  .footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+  .footer-brand { display: flex; align-items: center; gap: 10px; }
+  .footer-logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #6382ff 0%, #a264ff 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .footer-name { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+  .footer-sub { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+
+  .cta-btn {
+    background: linear-gradient(90deg, #6382ff 0%, #a264ff 100%);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 24px rgba(99,130,255,0.35);
+    white-space: nowrap;
+  }
+
+  /* ── CARD HORIZONTAL (story/wide) ── */
+  .card-wide {
+    width: 900px;
+    min-height: 360px;
+    background: linear-gradient(145deg, #0b0f1c 0%, #0e1428 50%, #080d1a 100%);
+    border: 1px solid rgba(99,130,255,0.18);
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+  }
+  .card-wide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 0% 50%, rgba(99,130,255,0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 100% 50%, rgba(160,80,255,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  .wide-left {
+    flex: 1;
+    padding: 44px 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .wide-headline {
+    font-family: 'Syne', 'Inter', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+  .wide-headline span {
+    background: linear-gradient(90deg, #6382ff 0%, #a264ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .wide-sub { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 28px; max-width: 340px; }
+  .wide-feats { display: flex; flex-direction: column; gap: 8px; margin-bottom: 32px; }
+  .wide-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(255,255,255,0.75); font-weight: 500; }
+  .wide-check {
+    width: 20px; height: 20px;
+    background: rgba(99,130,255,0.15);
+    border: 1px solid rgba(99,130,255,0.3);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    color: #a0b4ff;
+  }
+  .wide-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(90deg, #6382ff 0%, #a264ff 100%);
+    border-radius: 10px; padding: 12px 22px;
+    font-size: 13px; font-weight: 700; color: #fff;
+    box-shadow: 0 4px 20px rgba(99,130,255,0.35);
+    width: fit-content;
+  }
+
+  .wide-right {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 32px 32px 0;
+    position: relative;
+    gap: 12px;
+  }
+
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    margin-top: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     CARD VERTICAL (Instagram / WhatsApp)
+════════════════════════════════════════ -->
+<p class="label">CARD VERTICAL — screenshot para Instagram / WhatsApp</p>
+
+<div class="card">
+  <!-- Badge -->
+  <div class="badge">
+    <div class="badge-dot"></div>
+    SaaS para artesãos digitais
+  </div>
+
+  <!-- Headline -->
+  <h1 class="headline">
+    Sua vitrine digital.<br>
+    <span>Pronta em minutos.</span>
+  </h1>
+  <p class="sub">
+    Catálogo laser, papelaria digital e orçamentos profissionais — tudo em um só lugar, com sua identidade visual.
+  </p>
+
+  <!-- Números de impacto -->
+  <div style="display:flex;gap:12px;margin-bottom:28px;position:relative;">
+    <div style="flex:1;background:rgba(99,130,255,0.08);border:1px solid rgba(99,130,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">+26.000</div>
+      <div style="font-size:10px;font-weight:600;color:rgba(160,180,255,0.6);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;">produtos</div>
+    </div>
+    <div style="flex:1;background:rgba(160,100,255,0.08);border:1px solid rgba(160,100,255,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">88</div>
+      <div style="font-size:10px;font-weight:600;color:rgba(200,160,255,0.6);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;">categorias</div>
+    </div>
+    <div style="flex:1;background:rgba(78,205,196,0.07);border:1px solid rgba(78,205,196,0.2);border-radius:12px;padding:14px 16px;text-align:center;">
+      <div style="font-size:28px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">24h</div>
+      <div style="font-size:10px;font-weight:600;color:rgba(100,220,200,0.6);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em;">no ar</div>
+    </div>
+  </div>
+
+  <!-- Mockups -->
+  <div class="mockups-row">
+    <!-- Phone 1: Vitrine -->
+    <div class="phone phone-main">
+      <div class="m-vitrine">
+        <div class="m-hero">
+          <div class="m-hero-title">✦ Oficina Digital</div>
+          <div class="m-hero-sub">Sua loja online</div>
+        </div>
+        <div class="m-cats">
+          <div class="m-cat">Aniversário</div>
+          <div class="m-cat">MDF</div>
+          <div class="m-cat">360°</div>
+          <div class="m-cat">Bebê</div>
+        </div>
+        <div class="m-grid">
+          <div class="m-prod">
+            <div class="m-prod-img">🎂</div>
+            <div class="m-prod-info"><div class="m-prod-nome">Kit Festa Completo</div></div>
+          </div>
+          <div class="m-prod">
+            <div class="m-prod-img">🚗</div>
+            <div class="m-prod-info"><div class="m-prod-nome">Painel Automotivo</div></div>
+          </div>
+          <div class="m-prod">
+            <div class="m-prod-img">🌸</div>
+            <div class="m-prod-info"><div class="m-prod-nome">Aplique Floral</div></div>
+          </div>
+          <div class="m-prod">
+            <div class="m-prod-img">⭐</div>
+            <div class="m-prod-info"><div class="m-prod-nome">Bandeja MDF</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 2: Catálogo -->
+    <div class="phone phone-sm">
+      <div class="m-catalogo">
+        <div style="font-size:7px;font-weight:800;color:#fff;margin-bottom:4px;">Catálogo</div>
+        <div class="m-search">
+          <span class="m-search-icon">🔍</span>
+          buscar produto...
+        </div>
+        <div class="m-list">
+          <div class="m-item">
+            <div class="m-item-img">🎪</div>
+            <div class="m-item-info">
+              <div class="m-item-nome">Kit Circo Completo</div>
+              <div class="m-item-cat">Festa Infantil</div>
+            </div>
+          </div>
+          <div class="m-item">
+            <div class="m-item-img">🦁</div>
+            <div class="m-item-info">
+              <div class="m-item-nome">Safari Animals Set</div>
+              <div class="m-item-cat">Bebê & Infantil</div>
+            </div>
+          </div>
+          <div class="m-item">
+            <div class="m-item-img">🎵</div>
+            <div class="m-item-info">
+              <div class="m-item-nome">Aplique Musical</div>
+              <div class="m-item-cat">Decoração</div>
+            </div>
+          </div>
+          <div class="m-item">
+            <div class="m-item-img">💎</div>
+            <div class="m-item-info">
+              <div class="m-item-nome">Caixa Luxo MDF</div>
+              <div class="m-item-cat">Caixas & Baús</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 3: Calculadora -->
+    <div class="phone phone-sm">
+      <div class="m-orc" style="gap:5px;">
+        <div class="m-orc-header" style="font-size:6.5px;">🧮 Calculadora</div>
+        <!-- materiais -->
+        <div style="font-size:4.5px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Materiais</div>
+        <div class="m-orc-item"><div class="m-orc-nome">MDF 3mm</div><div class="m-orc-val" style="color:#94a3b8;">R$ 12</div></div>
+        <div class="m-orc-item"><div class="m-orc-nome">Tinta spray</div><div class="m-orc-val" style="color:#94a3b8;">R$ 8</div></div>
+        <!-- máquina -->
+        <div style="font-size:4.5px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;">Máquina</div>
+        <div class="m-orc-item"><div class="m-orc-nome">30 min · R$60/h</div><div class="m-orc-val" style="color:#94a3b8;">R$ 30</div></div>
+        <!-- resultado -->
+        <div style="border-radius:6px;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25);padding:6px 8px;display:flex;justify-content:space-between;align-items:center;margin-top:2px;">
+          <div style="font-size:5px;font-weight:700;color:#f97316;">Preço sugerido</div>
+          <div style="font-size:9px;font-weight:800;color:#fff;">R$ 150</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:2px 2px;">
+          <div style="font-size:4.5px;color:rgba(255,255,255,0.35);">Custo: R$ 50</div>
+          <div style="font-size:4.5px;color:#6bde9a;font-weight:700;">Lucro: R$ 100</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features grid -->
+  <div class="features">
+    <div class="feat">
+      <div class="feat-icon blue">🛍️</div>
+      <div class="feat-text">
+        <div class="feat-title">Vitrine online</div>
+        <div class="feat-desc">Seu link exclusivo com tema e cores personalizadas</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon purple">🔎</div>
+      <div class="feat-text">
+        <div class="feat-title">Catálogo inteligente</div>
+        <div class="feat-desc">+26.000 produtos em 88 categorias · busca por nome ou código #</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon green">📄</div>
+      <div class="feat-text">
+        <div class="feat-title">Orçamento em PDF</div>
+        <div class="feat-desc">Gere e envie propostas profissionais em segundos</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon orange">🖨️</div>
+      <div class="feat-text">
+        <div class="feat-title">Papelaria digital</div>
+        <div class="feat-desc">Coleções de kits prontos para vender no ato</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon teal">🎨</div>
+      <div class="feat-text">
+        <div class="feat-title">Temas exclusivos</div>
+        <div class="feat-desc">Grafite, Elegante, Luxury, Terracota e mais</div>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-icon pink">⚡</div>
+      <div class="feat-text">
+        <div class="feat-title">Pronto em minutos</div>
+        <div class="feat-desc">Sem código, sem designer, sem complicação</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card calculadora — destaque full width -->
+  <div style="background:linear-gradient(120deg,rgba(249,115,22,0.08) 0%,rgba(99,130,255,0.08) 100%);border:1px solid rgba(249,115,22,0.25);border-radius:16px;padding:18px 20px;margin-bottom:28px;position:relative;display:flex;gap:20px;align-items:flex-start;">
+    <div style="width:44px;height:44px;border-radius:12px;background:rgba(249,115,22,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🧮</div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:700;color:#e8eeff;margin-bottom:6px;">Calculadora de precificação</div>
+      <div style="font-size:11.5px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:12px;">Pare de chuthar preço. Informe os materiais, o tempo de máquina e outros custos — a calculadora aplica seu markup e mostra o preço de venda ideal e o lucro exato de cada trabalho.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;">
+        <div style="font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(249,115,22,0.12);color:#fb923c;border:1px solid rgba(249,115,22,0.2);">📦 Custo de materiais</div>
+        <div style="font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(99,130,255,0.12);color:#a0b4ff;border:1px solid rgba(99,130,255,0.2);">⏱️ Tempo de máquina</div>
+        <div style="font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(160,100,255,0.12);color:#c084fc;border:1px solid rgba(160,100,255,0.2);">📊 Markup personalizável</div>
+        <div style="font-size:10.5px;font-weight:600;padding:4px 10px;border-radius:6px;background:rgba(50,200,120,0.1);color:#4ade80;border:1px solid rgba(50,200,120,0.2);">💰 Lucro em R$ e %</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preços -->
+  <div style="display:flex;gap:12px;margin-bottom:28px;position:relative;">
+    <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:16px 18px;">
+      <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Mensal</div>
+      <div style="font-size:30px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">R$&nbsp;67</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.35);margin-top:4px;">por 30 dias</div>
+    </div>
+    <div style="flex:1;background:linear-gradient(135deg,rgba(99,130,255,0.12),rgba(160,100,255,0.1));border:1px solid rgba(99,130,255,0.3);border-radius:14px;padding:16px 18px;position:relative;">
+      <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#6382ff,#a264ff);border-radius:999px;padding:4px 12px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap;">MELHOR OFERTA</div>
+      <div style="font-size:10px;font-weight:700;color:#a0b4ff;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Anual</div>
+      <div style="font-size:30px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">R$&nbsp;500</div>
+      <div style="font-size:12px;color:rgba(160,180,255,0.5);margin-top:4px;">12 meses · economize R$ 304</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">
+      <div class="footer-logo">✦</div>
+      <div>
+        <div class="footer-name">CriArt Oficina Digital</div>
+        <div class="footer-sub">Vitrine profissional para artesãos</div>
+      </div>
+    </div>
+    <div class="cta-btn">Quero minha vitrine →</div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     CARD HORIZONTAL (WhatsApp / mensagem)
+════════════════════════════════════════ -->
+<p class="label">CARD HORIZONTAL — screenshot para mensagem de texto</p>
+
+<div class="card-wide">
+  <div class="wide-left">
+    <div class="badge" style="margin-bottom:20px;">
+      <div class="badge-dot"></div>
+      Lançamento • oferta x1
+    </div>
+    <div class="wide-headline">
+      Sua vitrine digital<br>
+      <span>funciona 24h por dia</span>
+    </div>
+    <p class="wide-sub">
+      Catálogo laser + papelaria + orçamentos em PDF. Tudo no seu link personalizado, sem mensalidade absurda.
+    </p>
+    <div class="wide-feats">
+      <div class="wide-feat"><div class="wide-check">✓</div> Vitrine com link próprio e tema exclusivo</div>
+      <div class="wide-feat"><div class="wide-check">✓</div> +26.000 produtos em 88 categorias laser</div>
+      <div class="wide-feat"><div class="wide-check">✓</div> Papelaria digital com kits prontos</div>
+      <div class="wide-feat"><div class="wide-check">✓</div> Gerador de orçamentos profissionais em PDF</div>
+      <div class="wide-feat"><div class="wide-check">✓</div> Calculadora: materiais + máquina = preço e lucro real</div>
+      <div class="wide-feat"><div class="wide-check">✓</div> Busca inteligente por produto ou código</div>
+    </div>
+    <!-- Preços -->
+    <div style="display:flex;gap:12px;margin-bottom:28px;">
+      <div style="flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Mensal</div>
+        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">R$&nbsp;67</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:3px;">por 30 dias</div>
+      </div>
+      <div style="flex:1;background:linear-gradient(135deg,rgba(99,130,255,0.12),rgba(160,100,255,0.1));border:1px solid rgba(99,130,255,0.3);border-radius:12px;padding:14px 16px;position:relative;">
+        <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#6382ff,#a264ff);border-radius:999px;padding:3px 10px;font-size:9px;font-weight:700;color:#fff;white-space:nowrap;">MELHOR OFERTA</div>
+        <div style="font-size:10px;font-weight:700;color:#a0b4ff;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Anual</div>
+        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1;">R$&nbsp;500</div>
+        <div style="font-size:11px;color:rgba(160,180,255,0.5);margin-top:3px;">12 meses • <s style="opacity:.5">R$ 804</s></div>
+      </div>
+    </div>
+    <div class="wide-cta">
+      ✦ Fale comigo agora →
+    </div>
+  </div>
+
+  <div class="wide-right">
+    <!-- Phone mini vitrine -->
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="phone" style="width:130px;height:220px;">
+        <div class="m-vitrine" style="padding:10px 8px;gap:7px;">
+          <div class="m-hero" style="height:55px;">
+            <div class="m-hero-title">✦ Minha Vitrine</div>
+            <div class="m-hero-sub">criart.app/minhaloja</div>
+          </div>
+          <div class="m-cats">
+            <div class="m-cat">MDF</div>
+            <div class="m-cat">Festa</div>
+          </div>
+          <div class="m-grid">
+            <div class="m-prod" style="height:52px;">
+              <div class="m-prod-img" style="height:32px;font-size:11px;">🎂</div>
+              <div class="m-prod-info"><div class="m-prod-nome">Kit Festa</div></div>
+            </div>
+            <div class="m-prod" style="height:52px;">
+              <div class="m-prod-img" style="height:32px;font-size:11px;">✂️</div>
+              <div class="m-prod-info"><div class="m-prod-nome">Aplique</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="label">Vitrine</div>
+    </div>
+
+    <!-- Phone mini orçamento -->
+    <div style="display:flex;flex-direction:column;align-items:center;">
+      <div class="phone" style="width:130px;height:180px;margin-top:40px;">
+        <div class="m-orc" style="padding:10px 8px;gap:5px;">
+          <div class="m-orc-header" style="font-size:6px;">Orçamento</div>
+          <div class="m-orc-item"><div class="m-orc-nome">Kit Festa</div><div class="m-orc-val">R$ 45</div></div>
+          <div class="m-orc-item"><div class="m-orc-nome">Aplique x2</div><div class="m-orc-val">R$ 22</div></div>
+          <div class="m-orc-total">
+            <div class="m-orc-total-label">TOTAL</div>
+            <div class="m-orc-total-val" style="font-size:7px;">R$ 67</div>
+          </div>
+          <div class="m-orc-btn" style="font-size:5px;">📄 Gerar PDF</div>
+        </div>
+      </div>
+      <div class="label">Orçamento PDF</div>
+    </div>
+  </div>
+</div>
+
+<p class="label" style="margin-bottom:48px;">Abra no navegador → Ctrl+Shift+I → Device Toolbar → 1080px largura → Screenshot</p>
+
+</body>
+</html>

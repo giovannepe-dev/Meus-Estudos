@@ -1,0 +1,2 @@
+ALTER TABLE public.km_divergences DROP CONSTRAINT IF EXISTS km_divergences_status_check;
+ALTER TABLE public.km_divergences ADD CONSTRAINT km_divergences_status_check CHECK (status IN ('pendente', 'ciente', 'justificado', 'resolvido'));

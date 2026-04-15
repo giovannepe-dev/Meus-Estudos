@@ -1,0 +1,7 @@
+project_id = "fhntkyhpfjqurjeysiqq"
+
+[functions.ocr-odometer]
+verify_jwt = false
+
+[functions.ocr-plate]
+verify_jwt = false

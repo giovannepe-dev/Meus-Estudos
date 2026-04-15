@@ -1,0 +1,1 @@
+ALTER TABLE public.categories ADD COLUMN destaque boolean NOT NULL DEFAULT false;

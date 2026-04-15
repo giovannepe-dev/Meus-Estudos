@@ -1,0 +1,154 @@
+// ============================================================
+// src/app/api/webhooks/telegram/route.ts
+// Webhook para bot do Telegram — sincroniza assets
+// ============================================================
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+
+const WEBHOOK_SECRET = process.env.TELEGRAM_WEBHOOK_SECRET
+const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
+
+// Valida o secret do webhook
+function validateSecret(req: NextRequest): boolean {
+  const secret = req.headers.get('x-telegram-bot-api-secret-token')
+  return secret === WEBHOOK_SECRET
+}
+
+// Envia mensagem via bot
+async function sendTelegramMessage(chatId: string, text: string) {
+  await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' }),
+  })
+}
+
+export async function POST(req: NextRequest) {
+  // Validação de segurança
+  if (!validateSecret(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let body: any
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  }
+
+  const supabase = createAdminClient()
+
+  // Processar update do Telegram
+  const message = body?.message || body?.channel_post
+
+  if (!message) {
+    return NextResponse.json({ ok: true })
+  }
+
+  const chatId = String(message.chat?.id)
+  const text = message.text || ''
+
+  // Comando: /produto <slug>
+  if (text.startsWith('/produto ')) {
+    const slug = text.replace('/produto ', '').trim()
+
+    const { data: product } = await supabase
+      .from('global_products')
+      .select(`*, tags:global_product_tags(tag), categoria:global_categories(nome)`)
+      .eq('slug', slug)
+      .single()
+
+    if (!product) {
+      await sendTelegramMessage(chatId, `❌ Produto <b>${slug}</b> não encontrado.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    const info = [
+      `📦 <b>${product.nome}</b>`,
+      product.categoria ? `📂 ${product.categoria.nome}` : '',
+      product.arquivo ? `📄 ${product.arquivo}` : '',
+      product.descricao ? `\n${product.descricao}` : '',
+      product.tags?.length ? `🏷️ ${product.tags.map((t: any) => t.tag).join(', ')}` : '',
+    ].filter(Boolean).join('\n')
+
+    await sendTelegramMessage(chatId, info)
+    return NextResponse.json({ ok: true })
+  }
+
+  // Comando: /sync — sincroniza imagem de produto
+  // Quando o bot recebe uma foto com caption /sync <slug>
+  if (message.photo && message.caption?.startsWith('/sync ')) {
+    const slug = message.caption.replace('/sync ', '').trim()
+    const fileId = message.photo[message.photo.length - 1].file_id // maior resolução
+
+    const { data: product } = await supabase
+      .from('global_products')
+      .select('id')
+      .eq('slug', slug)
+      .single()
+
+    if (!product) {
+      await sendTelegramMessage(chatId, `❌ Produto <b>${slug}</b> não encontrado.`)
+      return NextResponse.json({ ok: true })
+    }
+
+    // Salva o file_id para reuso no Telegram
+    await supabase.from('telegram_assets').upsert({
+      product_id: product.id,
+      product_type: 'global',
+      file_id: fileId,
+      file_type: 'photo',
+      synced_at: new Date().toISOString(),
+    }, { onConflict: 'product_id,product_type' })
+
+    await sendTelegramMessage(chatId, `✅ Imagem sincronizada para o produto <b>${slug}</b>!`)
+    return NextResponse.json({ ok: true })
+  }
+
+  // Comando: /catalogo — lista produtos em destaque
+  if (text === '/catalogo') {
+    const { data: products } = await supabase
+      .from('global_products')
+      .select('nome, slug, arquivo')
+      .eq('destaque', true)
+      .eq('ativo', true)
+      .limit(10)
+
+    if (!products?.length) {
+      await sendTelegramMessage(chatId, 'Nenhum produto em destaque cadastrado.')
+      return NextResponse.json({ ok: true })
+    }
+
+    const lista = products.map(p =>
+      `• <b>${p.nome}</b> (${p.slug})${p.arquivo ? ` — ${p.arquivo}` : ''}`
+    ).join('\n')
+
+    await sendTelegramMessage(chatId, `🌟 <b>Destaques:</b>\n\n${lista}`)
+    return NextResponse.json({ ok: true })
+  }
+
+  return NextResponse.json({ ok: true })
+}
+
+// GET: configurar webhook
+export async function GET(req: NextRequest) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  const webhookUrl = `${appUrl}/api/webhooks/telegram`
+
+  const response = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/setWebhook`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: webhookUrl,
+        secret_token: WEBHOOK_SECRET,
+        allowed_updates: ['message', 'channel_post'],
+      }),
+    }
+  )
+
+  const result = await response.json()
+  return NextResponse.json(result)
+}

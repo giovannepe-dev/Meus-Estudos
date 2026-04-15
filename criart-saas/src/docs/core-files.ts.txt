@@ -1,0 +1,347 @@
+// ============================================================
+// src/lib/supabase/client.ts — Browser client
+// ============================================================
+
+import { createBrowserClient } from '@supabase/ssr'
+import type { Database } from '@/types/supabase'
+
+export function createClient() {
+  return createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
+
+
+// ============================================================
+// src/lib/supabase/server.ts — Server client (RSC / Actions)
+// ============================================================
+
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import type { Database } from '@/types/supabase'
+
+export async function createClient() {
+  const cookieStore = await cookies()
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {}
+        },
+      },
+    }
+  )
+}
+
+
+// ============================================================
+// src/lib/supabase/admin.ts — Service role (server only)
+// Usar APENAS em API Routes e Server Actions confiáveis
+// ============================================================
+
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import type { Database } from '@/types/supabase'
+
+export function createAdminClient() {
+  return createSupabaseClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    }
+  )
+}
+
+
+// ============================================================
+// src/lib/hooks/useAuth.ts — Hook de autenticação
+// ============================================================
+
+'use client'
+
+import { useEffect, useState, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import type { User } from '@supabase/supabase-js'
+import type { Profile } from '@/types'
+
+interface AuthState {
+  user: User | null
+  profile: Profile | null
+  loading: boolean
+  isSuperadmin: boolean
+  signOut: () => Promise<void>
+}
+
+export function useAuth(): AuthState {
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [loading, setLoading] = useState(true)
+  const supabase = createClient()
+
+  const loadProfile = useCallback(async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single()
+    setProfile(data)
+  }, [supabase])
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_, session) => {
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          await loadProfile(session.user.id)
+        } else {
+          setProfile(null)
+        }
+        setLoading(false)
+      }
+    )
+    return () => subscription.unsubscribe()
+  }, [supabase, loadProfile])
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+  }
+
+  return {
+    user,
+    profile,
+    loading,
+    isSuperadmin: profile?.is_superadmin ?? false,
+    signOut,
+  }
+}
+
+
+// ============================================================
+// src/lib/hooks/useTenant.ts — Hook do tenant atual
+// ============================================================
+
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+import { createClient } from '@/lib/supabase/client'
+import type { Tenant, TenantSettings, TenantUser } from '@/types'
+
+export function useTenant() {
+  const supabase = createClient()
+
+  return useQuery({
+    queryKey: ['my-tenant'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return null
+
+      const { data: tenantUser } = await supabase
+        .from('tenant_users')
+        .select(`
+          *,
+          tenant:tenants(
+            *,
+            settings:tenant_settings(*)
+          )
+        `)
+        .eq('user_id', user.id)
+        .eq('ativo', true)
+        .single()
+
+      return tenantUser as TenantUser & {
+        tenant: Tenant & { settings: TenantSettings }
+      } | null
+    },
+    staleTime: 5 * 60 * 1000, // 5min
+  })
+}
+
+
+// ============================================================
+// src/lib/store/cartStore.ts — Zustand cart store
+// ============================================================
+
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import type { CartItem, CatalogProduct } from '@/types'
+import { v4 as uuidv4 } from 'uuid'
+
+interface CartStore {
+  items: CartItem[]
+  tenantSlug: string | null
+
+  addItem: (product: CatalogProduct, quantidade?: number) => void
+  removeItem: (id: string) => void
+  updateQuantidade: (id: string, quantidade: number) => void
+  updateObservacao: (id: string, observacao: string) => void
+  clearCart: () => void
+  totalItems: () => number
+  totalEstimado: () => number | null
+}
+
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      tenantSlug: null,
+
+      addItem: (product, quantidade = 1) => {
+        const existing = get().items.find(i => i.product.id === product.id)
+        if (existing) {
+          set(state => ({
+            items: state.items.map(i =>
+              i.product.id === product.id
+                ? { ...i, quantidade: i.quantidade + quantidade }
+                : i
+            )
+          }))
+        } else {
+          set(state => ({
+            items: [...state.items, {
+              id: uuidv4(),
+              product,
+              quantidade,
+              observacao: '',
+            }]
+          }))
+        }
+      },
+
+      removeItem: (id) => {
+        set(state => ({ items: state.items.filter(i => i.id !== id) }))
+      },
+
+      updateQuantidade: (id, quantidade) => {
+        if (quantidade <= 0) {
+          get().removeItem(id)
+          return
+        }
+        set(state => ({
+          items: state.items.map(i =>
+            i.id === id ? { ...i, quantidade } : i
+          )
+        }))
+      },
+
+      updateObservacao: (id, observacao) => {
+        set(state => ({
+          items: state.items.map(i =>
+            i.id === id ? { ...i, observacao } : i
+          )
+        }))
+      },
+
+      clearCart: () => set({ items: [] }),
+
+      totalItems: () => get().items.reduce((acc, i) => acc + i.quantidade, 0),
+
+      totalEstimado: () => {
+        const items = get().items
+        const hasPrice = items.some(i => i.product.preco !== null)
+        if (!hasPrice) return null
+        return items.reduce((acc, i) =>
+          acc + (i.product.preco ?? 0) * i.quantidade, 0
+        )
+      },
+    }),
+    {
+      name: 'laserpro-cart',
+      partialize: (state) => ({
+        items: state.items,
+        tenantSlug: state.tenantSlug,
+      }),
+    }
+  )
+)
+
+
+// ============================================================
+// src/lib/utils/whatsapp.ts — Formata mensagem WhatsApp
+// ============================================================
+
+import type { WhatsAppOrderPayload } from '@/types'
+
+export function formatWhatsAppMessage(payload: WhatsAppOrderPayload): string {
+  const { settings, items, totalEstimado, mostrarPreco } = payload
+
+  const linhas: string[] = []
+
+  // Saudação
+  linhas.push(settings.mensagem_padrao || 'Olá! Gostaria de fazer um orçamento:')
+  linhas.push('')
+  linhas.push('📋 *Itens do pedido:*')
+  linhas.push('')
+
+  // Itens
+  items.forEach((item, idx) => {
+    linhas.push(`*${idx + 1}. ${item.nome}*`)
+    if (item.categoria) linhas.push(`   📂 Categoria: ${item.categoria}`)
+    if (item.arquivo) linhas.push(`   📄 Arquivo: ${item.arquivo}`)
+    linhas.push(`   🔢 Quantidade: ${item.quantidade}`)
+    if (mostrarPreco && item.preco) {
+      const total = item.preco * item.quantidade
+      linhas.push(`   💰 Preço unit.: ${formatBRL(item.preco)} | Total: ${formatBRL(total)}`)
+    }
+    if (item.observacao) {
+      linhas.push(`   📝 Obs.: ${item.observacao}`)
+    }
+    linhas.push('')
+  })
+
+  // Total
+  if (mostrarPreco && totalEstimado !== null) {
+    linhas.push(`💵 *Total estimado: ${formatBRL(totalEstimado)}*`)
+    linhas.push('')
+  }
+
+  linhas.push('Aguardo retorno. Obrigado! 🙏')
+
+  return linhas.join('\n')
+}
+
+export function buildWhatsAppURL(phone: string, message: string): string {
+  const cleaned = phone.replace(/\D/g, '')
+  const encoded = encodeURIComponent(message)
+  return `https://wa.me/${cleaned}?text=${encoded}`
+}
+
+function formatBRL(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value)
+}
+
+
+// ============================================================
+// src/lib/utils/slug.ts — Geração de slugs
+// ============================================================
+
+export function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+export function ensureUniqueSlug(slug: string, existingSlugs: string[]): string {
+  if (!existingSlugs.includes(slug)) return slug
+  let counter = 1
+  while (existingSlugs.includes(`${slug}-${counter}`)) counter++
+  return `${slug}-${counter}`
+}

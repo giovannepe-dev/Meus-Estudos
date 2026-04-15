@@ -1,0 +1,380 @@
+// ============================================================
+// src/lib/queries/catalog.ts
+// Queries do catálogo combinado (global + tenant)
+// ============================================================
+
+import { createClient } from '@/lib/supabase/client'
+import type { CatalogFilters, PaginationParams, CatalogProduct } from '@/types'
+
+export async function fetchCatalogProducts(
+  tenantId: string,
+  filters: CatalogFilters = {},
+  pagination: PaginationParams = { page: 1, pageSize: 24 }
+) {
+  const supabase = createClient()
+  const { page, pageSize } = pagination
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
+    .from('v_tenant_catalog_products')
+    .select('*', { count: 'exact' })
+    .eq('tenant_id', tenantId)
+    .order('destaque', { ascending: false })
+    .order('ordem', { ascending: true })
+    .range(from, to)
+
+  // Filtros
+  if (filters.destaque) query = query.eq('destaque', true)
+  if (filters.novidade) query = query.eq('novidade', true)
+  if (filters.personalizavel) query = query.eq('personalizavel', true)
+  if (filters.source && filters.source !== 'all') {
+    query = query.eq('source', filters.source)
+  }
+  if (filters.categoriaSlug) {
+    query = query.eq('categoria_slug', filters.categoriaSlug)
+  }
+  if (filters.search) {
+    // Busca full-text otimizada
+    query = query.textSearch('search_vector', filters.search, {
+      type: 'websearch',
+      config: 'portuguese',
+    })
+  }
+
+  const { data, error, count } = await query
+
+  if (error) throw error
+
+  return {
+    data: data as CatalogProduct[],
+    total: count ?? 0,
+    page,
+    pageSize,
+    totalPages: Math.ceil((count ?? 0) / pageSize),
+    hasNext: to < (count ?? 0) - 1,
+    hasPrev: page > 1,
+  }
+}
+
+export async function fetchProductBySlug(
+  tenantId: string,
+  slug: string,
+  source: 'global' | 'tenant'
+) {
+  const supabase = createClient()
+
+  if (source === 'global') {
+    const { data, error } = await supabase
+      .from('global_products')
+      .select(`*, categoria:global_categories(*), tags:global_product_tags(tag)`)
+      .eq('slug', slug)
+      .eq('ativo', true)
+      .single()
+
+    if (error) throw error
+    return data
+  }
+
+  const { data, error } = await supabase
+    .from('tenant_products')
+    .select(`*, categoria:tenant_categories(*), tags:tenant_product_tags(tag)`)
+    .eq('tenant_id', tenantId)
+    .eq('slug', slug)
+    .eq('ativo', true)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+
+// ============================================================
+// src/lib/queries/tenants.ts (superadmin)
+// ============================================================
+
+import { createClient } from '@/lib/supabase/client'
+import type { Tenant } from '@/types'
+
+export async function fetchAllTenants() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('tenants')
+    .select(`*, settings:tenant_settings(*)`)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data as (Tenant & { settings: any })[]
+}
+
+export async function fetchTenantBySlug(slug: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('tenants')
+    .select(`*, settings:tenant_settings(*)`)
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+
+// ============================================================
+// src/lib/queries/globalProducts.ts
+// ============================================================
+
+import { createClient } from '@/lib/supabase/client'
+
+export async function fetchGlobalProducts(
+  page = 1,
+  pageSize = 20,
+  search?: string
+) {
+  const supabase = createClient()
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
+    .from('global_products')
+    .select(`
+      *,
+      categoria:global_categories(id, nome, slug, emoji),
+      tags:global_product_tags(tag)
+    `, { count: 'exact' })
+    .order('ordem', { ascending: true })
+    .range(from, to)
+
+  if (search) {
+    query = query.textSearch('search_vector', search, {
+      type: 'websearch',
+      config: 'portuguese',
+    })
+  }
+
+  const { data, error, count } = await query
+  if (error) throw error
+
+  return {
+    data: data ?? [],
+    total: count ?? 0,
+    totalPages: Math.ceil((count ?? 0) / pageSize),
+  }
+}
+
+export async function fetchGlobalCategories() {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('global_categories')
+    .select('*')
+    .eq('ativa', true)
+    .order('ordem', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+
+// ============================================================
+// src/lib/queries/tenantProducts.ts
+// ============================================================
+
+import { createClient } from '@/lib/supabase/client'
+
+export async function fetchTenantProducts(
+  tenantId: string,
+  page = 1,
+  pageSize = 20,
+  search?: string
+) {
+  const supabase = createClient()
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  let query = supabase
+    .from('tenant_products')
+    .select(`
+      *,
+      categoria:tenant_categories(id, nome, slug, emoji),
+      tags:tenant_product_tags(tag)
+    `, { count: 'exact' })
+    .eq('tenant_id', tenantId)
+    .order('ordem', { ascending: true })
+    .range(from, to)
+
+  if (search) {
+    query = query.textSearch('search_vector', search, {
+      type: 'websearch',
+      config: 'portuguese',
+    })
+  }
+
+  const { data, error, count } = await query
+  if (error) throw error
+  return { data: data ?? [], total: count ?? 0 }
+}
+
+export async function fetchTenantCategories(tenantId: string) {
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('tenant_categories')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .eq('ativa', true)
+    .order('ordem', { ascending: true })
+
+  if (error) throw error
+  return data ?? []
+}
+
+
+// ============================================================
+// src/lib/mutations/products.ts
+// ============================================================
+
+import { createClient } from '@/lib/supabase/client'
+import type { ProductSchema } from '@/lib/validations/product'
+import { generateSlug } from '@/lib/utils/slug'
+
+export async function createGlobalProduct(data: ProductSchema & { created_by: string }) {
+  const supabase = createClient()
+  const slug = data.slug || generateSlug(data.nome)
+
+  const { tags, ...productData } = data
+
+  const { data: product, error } = await supabase
+    .from('global_products')
+    .insert({ ...productData, slug })
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Inserir tags
+  if (tags.length > 0) {
+    await supabase.from('global_product_tags').insert(
+      tags.map(tag => ({ product_id: product.id, tag }))
+    )
+  }
+
+  return product
+}
+
+export async function updateGlobalProduct(
+  id: string,
+  data: Partial<ProductSchema>
+) {
+  const supabase = createClient()
+  const { tags, ...productData } = data
+
+  const { data: product, error } = await supabase
+    .from('global_products')
+    .update(productData)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Sync tags
+  if (tags !== undefined) {
+    await supabase.from('global_product_tags').delete().eq('product_id', id)
+    if (tags.length > 0) {
+      await supabase.from('global_product_tags').insert(
+        tags.map(tag => ({ product_id: id, tag }))
+      )
+    }
+  }
+
+  return product
+}
+
+export async function toggleProductVisibility(
+  tenantId: string,
+  productId: string,
+  hidden: boolean
+) {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('tenant_product_visibility')
+    .upsert(
+      { tenant_id: tenantId, product_id: productId, hidden },
+      { onConflict: 'tenant_id,product_id' }
+    )
+
+  if (error) throw error
+}
+
+export async function toggleCategoryVisibility(
+  tenantId: string,
+  categoryId: string,
+  hidden: boolean
+) {
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('tenant_category_visibility')
+    .upsert(
+      { tenant_id: tenantId, category_id: categoryId, hidden },
+      { onConflict: 'tenant_id,category_id' }
+    )
+
+  if (error) throw error
+}
+
+
+// ============================================================
+// src/lib/hooks/useCatalog.ts
+// ============================================================
+
+'use client'
+
+import { useQuery, useInfiniteQuery } from '@tanstack/react-query'
+import { fetchCatalogProducts, fetchGlobalCategories, fetchTenantCategories } from '@/lib/queries'
+import type { CatalogFilters } from '@/types'
+
+export function useCatalog(tenantId: string, filters: CatalogFilters = {}) {
+  return useInfiniteQuery({
+    queryKey: ['catalog', tenantId, filters],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchCatalogProducts(tenantId, filters, { page: pageParam, pageSize: 24 }),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.page + 1 : undefined,
+    initialPageParam: 1,
+    staleTime: 2 * 60 * 1000, // 2 min
+  })
+}
+
+export function useCatalogCategories(tenantId: string) {
+  return useQuery({
+    queryKey: ['catalog-categories', tenantId],
+    queryFn: async () => {
+      const [global, tenant] = await Promise.all([
+        fetchGlobalCategories(),
+        fetchTenantCategories(tenantId),
+      ])
+      return { global, tenant, all: [...global, ...tenant] }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+
+// ============================================================
+// src/lib/hooks/useDebounce.ts
+// ============================================================
+
+import { useState, useEffect } from 'react'
+
+export function useDebounce<T>(value: T, delay = 400): T {
+  const [debounced, setDebounced] = useState<T>(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debounced
+}

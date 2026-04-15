@@ -1,0 +1,1 @@
+ALTER TABLE public.goals ADD COLUMN deadline_type text NOT NULL DEFAULT 'date';

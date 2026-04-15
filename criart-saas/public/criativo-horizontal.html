@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080">
+<title>CriArt — Criativo Horizontal</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #050810;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .card {
+    width: 1080px;
+    min-height: 566px;
+    background: linear-gradient(145deg, #0b0f1c 0%, #0e1428 40%, #080d1a 100%);
+    border-top: 1px solid rgba(99,130,255,0.18);
+    border-bottom: 1px solid rgba(99,130,255,0.18);
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 10% 20%, rgba(99,130,255,0.2) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(160,80,255,0.16) 0%, transparent 50%),
+      radial-gradient(ellipse at 55% 50%, rgba(30,180,120,0.05) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* LEFT COLUMN */
+  .col-left {
+    flex: 0 0 520px;
+    padding: 52px 48px 48px 56px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(99,130,255,0.12); border: 1px solid rgba(99,130,255,0.3);
+    border-radius: 999px; padding: 6px 16px; font-size: 11px; font-weight: 700;
+    color: #a0b4ff; letter-spacing: 0.08em; text-transform: uppercase;
+    width: fit-content; margin-bottom: 22px;
+  }
+  .badge-dot { width: 6px; height: 6px; background: #6382ff; border-radius: 50%; box-shadow: 0 0 8px #6382ff; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .headline {
+    font-family: 'Syne', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    line-height: 1.12;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+  }
+  .headline .accent { color: #6382ff; }
+  .headline .accent2 { color: #a855f7; }
+
+  .sub {
+    font-size: 14px;
+    color: #8898bb;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 380px;
+  }
+
+  .features {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .feature-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .feature-icon {
+    width: 22px; height: 22px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0; margin-top: 1px;
+  }
+  .fi-blue  { background: rgba(99,130,255,0.15); }
+  .fi-purple { background: rgba(168,85,247,0.15); }
+  .fi-green  { background: rgba(34,197,94,0.15); }
+  .fi-orange { background: rgba(251,146,60,0.15); }
+  .fi-pink   { background: rgba(236,72,153,0.15); }
+  .fi-cyan   { background: rgba(6,182,212,0.15); }
+  .feature-text { font-size: 13px; color: #c8d4f0; line-height: 1.4; }
+  .feature-text strong { color: #fff; font-weight: 600; }
+
+  .pricing-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 28px;
+  }
+  .price-badge {
+    background: rgba(99,130,255,0.1);
+    border: 1px solid rgba(99,130,255,0.25);
+    border-radius: 10px;
+    padding: 10px 16px;
+  }
+  .price-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px; font-weight: 800; color: #fff;
+  }
+  .price-value span { font-size: 13px; font-weight: 500; color: #8898bb; }
+  .price-label { font-size: 11px; color: #6b7fa3; margin-top: 1px; }
+  .price-sep { font-size: 12px; color: #3a4460; }
+  .price-badge.annual {
+    background: rgba(168,85,247,0.1);
+    border-color: rgba(168,85,247,0.25);
+  }
+  .price-save {
+    font-size: 11px;
+    font-weight: 700;
+    color: #a855f7;
+    background: rgba(168,85,247,0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-top: 3px;
+    display: inline-block;
+  }
+
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #6382ff 0%, #7c4dff 100%);
+    color: #fff; font-weight: 700; font-size: 14px;
+    padding: 14px 28px; border-radius: 12px;
+    text-decoration: none; letter-spacing: -0.01em;
+    box-shadow: 0 8px 32px rgba(99,130,255,0.35);
+    transition: opacity 0.2s;
+    width: fit-content;
+  }
+
+  /* RIGHT COLUMN */
+  .col-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    padding: 40px 40px 40px 24px;
+    gap: 16px;
+  }
+
+  /* PHONE MOCKUPS */
+  .phone {
+    width: 148px;
+    height: 296px;
+    background: #0f1422;
+    border-radius: 22px;
+    border: 2px solid rgba(99,130,255,0.25);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    flex-shrink: 0;
+  }
+  .phone-notch {
+    width: 50px; height: 10px;
+    background: #0a0e1a;
+    border-radius: 0 0 8px 8px;
+    margin: 0 auto;
+    position: relative; z-index: 2;
+  }
+  .phone-screen { width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+  /* VITRINE SCREEN */
+  .vitrine-screen {
+    background: linear-gradient(180deg, #12172a 0%, #0d1220 100%);
+    padding: 8px;
+  }
+  .vs-header {
+    background: rgba(99,130,255,0.1); border-radius: 8px;
+    padding: 6px 8px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .vs-logo { width: 14px; height: 14px; background: linear-gradient(135deg, #6382ff, #a855f7); border-radius: 4px; }
+  .vs-title { font-size: 8px; font-weight: 700; color: #a0b4ff; }
+  .vs-cats {
+    display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px;
+  }
+  .vs-cat {
+    background: rgba(99,130,255,0.12); border: 1px solid rgba(99,130,255,0.2);
+    border-radius: 999px; padding: 2px 7px; font-size: 6.5px; color: #a0b4ff;
+  }
+  .vs-cat.active { background: rgba(99,130,255,0.3); color: #fff; }
+  .vs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .vs-item {
+    background: rgba(255,255,255,0.04); border-radius: 6px;
+    padding: 5px; display: flex; flex-direction: column; gap: 3px;
+  }
+  .vs-img { height: 36px; background: linear-gradient(135deg, rgba(99,130,255,0.2), rgba(168,85,247,0.15)); border-radius: 4px; }
+  .vs-name { font-size: 5.5px; color: #c8d4f0; font-weight: 600; line-height: 1.3; }
+  .vs-price { font-size: 6px; color: #6382ff; font-weight: 700; }
+
+  /* CALCULATOR SCREEN */
+  .calc-screen {
+    background: linear-gradient(180deg, #0f1728 0%, #0c1320 100%);
+    padding: 8px;
+  }
+  .cs-title { font-size: 7.5px; font-weight: 700; color: #fff; margin-bottom: 8px; line-height: 1.3; }
+  .cs-row {
+    display: flex; gap: 4px; align-items: center; margin-bottom: 5px;
+  }
+  .cs-label { font-size: 6px; color: #6b7fa3; flex: 1; }
+  .cs-input {
+    background: rgba(99,130,255,0.1); border: 1px solid rgba(99,130,255,0.2);
+    border-radius: 4px; padding: 2px 5px; font-size: 6px; color: #a0b4ff;
+    width: 44px; text-align: right;
+  }
+  .cs-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 6px 0; }
+  .cs-total-label { font-size: 6px; color: #8898bb; margin-bottom: 3px; }
+  .cs-total-value {
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800;
+    color: #6382ff; margin-bottom: 6px;
+  }
+  .cs-breakdown { display: flex; flex-direction: column; gap: 3px; }
+  .cs-line { display: flex; justify-content: space-between; }
+  .cs-line-label { font-size: 5.5px; color: #6b7fa3; }
+  .cs-line-val { font-size: 5.5px; color: #c8d4f0; font-weight: 600; }
+  .cs-cta {
+    background: linear-gradient(135deg, #6382ff, #7c4dff); border-radius: 5px;
+    padding: 4px; text-align: center; font-size: 6px; color: #fff; font-weight: 700;
+    margin-top: 8px;
+  }
+
+  /* DIVIDER LINE between phones */
+  .phone-mid {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  }
+  .phone-connector { width: 1px; height: 40px; background: linear-gradient(180deg, transparent, rgba(99,130,255,0.3), transparent); }
+
+  /* GLOW RINGS behind phones */
+  .phone-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  /* STAT PILLS on the right side */
+  .stat-pills {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stat-pill {
+    background: rgba(13,18,34,0.85);
+    border: 1px solid rgba(99,130,255,0.2);
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+  }
+  .stat-pill-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px; font-weight: 800; color: #fff;
+  }
+  .stat-pill-val .accent { color: #6382ff; }
+  .stat-pill-label { font-size: 9px; color: #6b7fa3; margin-top: 1px; }
+
+  /* SEPARATOR */
+  .col-sep {
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, rgba(99,130,255,0.2) 30%, rgba(99,130,255,0.2) 70%, transparent 100%);
+    flex-shrink: 0;
+    align-self: stretch;
+    position: relative;
+    z-index: 1;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LEFT COLUMN -->
+  <div class="col-left">
+
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Vitrine Digital para Papelaria
+    </div>
+
+    <h1 class="headline">
+      Sua papelaria<br>
+      <span class="accent">online</span> em<br>
+      <span class="accent2">minutos.</span>
+    </h1>
+
+    <p class="sub">
+      Catálogo completo, calculadora de preços e vitrine profissional — sem precisar de técnico ou agência.
+    </p>
+
+    <div class="features">
+      <div class="feature-row">
+        <div class="feature-icon fi-blue">🛍️</div>
+        <div class="feature-text"><strong>Vitrine com +26.000 produtos</strong> prontos para exibir — sem cadastrar nada</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon fi-purple">🧮</div>
+        <div class="feature-text"><strong>Calculadora de orçamentos</strong> com especificações, acabamentos e prazo de entrega</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon fi-green">📂</div>
+        <div class="feature-text"><strong>88 categorias organizadas</strong> — papelaria, brindes, gráfica, sublimação e mais</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon fi-orange">⚡</div>
+        <div class="feature-text"><strong>Pedidos via WhatsApp</strong> — cliente clica, você já recebe no celular</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon fi-pink">🎨</div>
+        <div class="feature-text"><strong>Sua marca, suas cores</strong> — link personalizado com nome da sua empresa</div>
+      </div>
+      <div class="feature-row">
+        <div class="feature-icon fi-cyan">📊</div>
+        <div class="feature-text"><strong>Novidades automáticas</strong> — catálogo atualizado toda semana</div>
+      </div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-badge">
+        <div class="price-value">R$67<span>/mês</span></div>
+        <div class="price-label">Mensal · cancele quando quiser</div>
+      </div>
+      <div class="price-sep">ou</div>
+      <div class="price-badge annual">
+        <div class="price-value">R$500<span>/ano</span></div>
+        <div class="price-label">Anual</div>
+        <div class="price-save">economize R$304 🎉</div>
+      </div>
+    </div>
+
+    <a href="https://wa.me/5562998816808?text=Ol%C3%A1%2C%20quero%20minha%20vitrine!" class="cta-btn">
+      Quero minha vitrine →
+    </a>
+
+  </div>
+
+  <div class="col-sep"></div>
+
+  <!-- RIGHT COLUMN: MOCKUPS -->
+  <div class="col-right">
+
+    <!-- Phone 1: Vitrine -->
+    <div class="phone">
+      <div class="phone-screen vitrine-screen">
+        <div class="phone-notch"></div>
+        <div style="padding: 6px 6px 6px;">
+          <div class="vs-header">
+            <div class="vs-logo"></div>
+            <span class="vs-title">CriArt Papelaria</span>
+          </div>
+          <div class="vs-cats">
+            <div class="vs-cat active">Todos</div>
+            <div class="vs-cat">Convites</div>
+            <div class="vs-cat">Brindes</div>
+            <div class="vs-cat">Gráfica</div>
+          </div>
+          <div class="vs-grid">
+            <div class="vs-item">
+              <div class="vs-img" style="background:linear-gradient(135deg,rgba(99,130,255,0.25),rgba(168,85,247,0.18))"></div>
+              <div class="vs-name">Convite Casamento Clássico</div>
+              <div class="vs-price">A partir de R$1,20</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-img" style="background:linear-gradient(135deg,rgba(34,197,94,0.2),rgba(99,130,255,0.15))"></div>
+              <div class="vs-name">Adesivo Personalizado</div>
+              <div class="vs-price">A partir de R$0,80</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-img" style="background:linear-gradient(135deg,rgba(251,146,60,0.2),rgba(236,72,153,0.15))"></div>
+              <div class="vs-name">Caixinha Kraft 10x10</div>
+              <div class="vs-price">A partir de R$2,50</div>
+            </div>
+            <div class="vs-item">
+              <div class="vs-img" style="background:linear-gradient(135deg,rgba(6,182,212,0.2),rgba(99,130,255,0.15))"></div>
+              <div class="vs-name">Tag Personalizada</div>
+              <div class="vs-price">A partir de R$0,40</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 2: Calculator (slightly taller, center) -->
+    <div class="phone" style="height:316px; border-color: rgba(168,85,247,0.3); box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(168,85,247,0.08);">
+      <div class="phone-screen calc-screen">
+        <div class="phone-notch"></div>
+        <div style="padding: 8px 7px 6px;">
+          <div class="cs-title">🧮 Calculadora de<br>Orçamento</div>
+          <div class="cs-row">
+            <div class="cs-label">Produto</div>
+            <div class="cs-input">Convite</div>
+          </div>
+          <div class="cs-row">
+            <div class="cs-label">Quantidade</div>
+            <div class="cs-input">200 un</div>
+          </div>
+          <div class="cs-row">
+            <div class="cs-label">Acabamento</div>
+            <div class="cs-input">Laminado</div>
+          </div>
+          <div class="cs-row">
+            <div class="cs-label">Prazo</div>
+            <div class="cs-input">7 dias</div>
+          </div>
+          <div class="cs-divider"></div>
+          <div class="cs-total-label">Total estimado</div>
+          <div class="cs-total-value">R$284,00</div>
+          <div class="cs-breakdown">
+            <div class="cs-line">
+              <span class="cs-line-label">Custo unitário</span>
+              <span class="cs-line-val">R$1,42</span>
+            </div>
+            <div class="cs-line">
+              <span class="cs-line-label">Arte inclusa</span>
+              <span class="cs-line-val" style="color:#22c55e">Sim ✓</span>
+            </div>
+            <div class="cs-line">
+              <span class="cs-line-label">Entrega estimada</span>
+              <span class="cs-line-val">Seg, 14/04</span>
+            </div>
+          </div>
+          <div class="cs-cta">Pedir pelo WhatsApp →</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phone 3: Catalog category -->
+    <div class="phone">
+      <div class="phone-screen" style="background: linear-gradient(180deg, #111827 0%, #0d1220 100%); padding: 8px;">
+        <div class="phone-notch"></div>
+        <div style="padding: 6px 4px 4px;">
+          <div style="font-size:7.5px; font-weight:700; color:#fff; margin-bottom:6px;">📦 Convites & Papelaria</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="background:rgba(255,255,255,0.04);border-radius:7px;padding:6px;display:flex;gap:6px;align-items:center;">
+              <div style="width:28px;height:28px;border-radius:5px;background:linear-gradient(135deg,rgba(99,130,255,0.3),rgba(168,85,247,0.2));flex-shrink:0;"></div>
+              <div>
+                <div style="font-size:6.5px;font-weight:600;color:#c8d4f0;line-height:1.3;">Convite Casamento Luxury</div>
+                <div style="font-size:5.5px;color:#6b7fa3;margin-top:1px;">200 opções disponíveis</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border-radius:7px;padding:6px;display:flex;gap:6px;align-items:center;">
+              <div style="width:28px;height:28px;border-radius:5px;background:linear-gradient(135deg,rgba(34,197,94,0.25),rgba(6,182,212,0.15));flex-shrink:0;"></div>
+              <div>
+                <div style="font-size:6.5px;font-weight:600;color:#c8d4f0;line-height:1.3;">Tag Kraft Personalizada</div>
+                <div style="font-size:5.5px;color:#6b7fa3;margin-top:1px;">85 opções disponíveis</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border-radius:7px;padding:6px;display:flex;gap:6px;align-items:center;">
+              <div style="width:28px;height:28px;border-radius:5px;background:linear-gradient(135deg,rgba(251,146,60,0.25),rgba(236,72,153,0.15));flex-shrink:0;"></div>
+              <div>
+                <div style="font-size:6.5px;font-weight:600;color:#c8d4f0;line-height:1.3;">Envelope Perolado</div>
+                <div style="font-size:5.5px;color:#6b7fa3;margin-top:1px;">42 opções disponíveis</div>
+              </div>
+            </div>
+            <div style="background:rgba(99,130,255,0.08);border-radius:7px;padding:5px;text-align:center;">
+              <div style="font-size:6px;color:#a0b4ff;font-weight:600;">Ver todos os 26.000+ produtos →</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end col-right -->
+
+</div><!-- end card -->
+
+</body>
+</html>

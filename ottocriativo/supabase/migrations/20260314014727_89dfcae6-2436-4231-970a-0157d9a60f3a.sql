@@ -1,0 +1,1 @@
+ALTER TABLE public.telegram_messages ADD COLUMN IF NOT EXISTS media_group_id text DEFAULT NULL;

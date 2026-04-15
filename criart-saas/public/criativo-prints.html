@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=800">
+<title>CriArt — Criativo com Prints</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Syne:wght@700;800&display=swap');
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #050810;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .card {
+    width: 800px;
+    background: linear-gradient(160deg, #0b0f1c 0%, #0d1225 50%, #080c18 100%);
+    position: relative;
+    padding: 52px 56px 52px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(99,130,255,0.18) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(160,80,255,0.14) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* HEADER */
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(99,130,255,0.12); border: 1px solid rgba(99,130,255,0.3);
+    border-radius: 999px; padding: 6px 16px; font-size: 11px; font-weight: 700;
+    color: #a0b4ff; letter-spacing: 0.08em; text-transform: uppercase;
+    width: fit-content; margin-bottom: 20px; position: relative;
+  }
+  .badge-dot { width: 6px; height: 6px; background: #6382ff; border-radius: 50%;
+    box-shadow: 0 0 8px #6382ff; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .headline {
+    font-family: 'Syne', sans-serif;
+    font-size: 38px; font-weight: 800; line-height: 1.25;
+    color: #fff; letter-spacing: -0.03em; margin-bottom: 16px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .headline span.line {
+    display: block;
+  }
+  .headline span.line-sm {
+    display: block;
+    font-size: 22px; font-weight: 600; color: #8898bb;
+    letter-spacing: -0.01em;
+  }
+  .headline .blue {
+    color: #6382ff;
+    text-shadow: 0 0 32px rgba(99,130,255,0.4);
+  }
+  .headline .purple {
+    color: #a855f7;
+    text-shadow: 0 0 32px rgba(168,85,247,0.35);
+  }
+
+  .sub {
+    font-size: 15px; color: #8898bb; line-height: 1.65;
+    max-width: 560px; margin-bottom: 40px;
+  }
+  .sub strong { color: #c8d4f0; }
+
+  /* SECTION BLOCKS */
+  .section {
+    position: relative; margin-bottom: 32px;
+  }
+
+  .section-label {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  }
+  .section-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .n1 { background: linear-gradient(135deg, #6382ff, #7c4dff); }
+  .n2 { background: linear-gradient(135deg, #a855f7, #7c3aed); }
+  .n3 { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+  .section-title {
+    font-size: 17px; font-weight: 700; color: #fff; line-height: 1.3;
+  }
+  .section-desc {
+    font-size: 13px; color: #6b7fa3; margin-top: 1px; line-height: 1.4;
+  }
+
+  /* SCREENSHOT CONTAINER */
+  .ss-wrap {
+    position: relative; border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(99,130,255,0.2);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+  }
+  .ss-wrap img {
+    width: 100%; display: block;
+    border-radius: 14px;
+  }
+
+  /* OVERLAY BADGE ON SCREENSHOT */
+  .ss-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(0deg, rgba(6,8,20,0.92) 0%, rgba(6,8,20,0.6) 60%, transparent 100%);
+    padding: 28px 20px 18px;
+    display: flex; align-items: flex-end; justify-content: space-between;
+  }
+  .ss-text {
+    font-size: 14px; font-weight: 700; color: #fff; line-height: 1.4;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .ss-text span { display: block; font-size: 12px; font-weight: 400; color: #a0b4ff; margin-top: 2px; }
+  .ss-stat {
+    background: rgba(99,130,255,0.15); border: 1px solid rgba(99,130,255,0.3);
+    border-radius: 8px; padding: 6px 12px; text-align: right; flex-shrink: 0;
+  }
+  .ss-stat-val {
+    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: #fff;
+  }
+  .ss-stat-label { font-size: 10px; color: #6b7fa3; margin-top: 1px; }
+
+  .ss-stat.green { background: rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.3); }
+  .ss-stat.purple { background: rgba(168,85,247,0.12); border-color: rgba(168,85,247,0.3); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(99,130,255,0.2), transparent);
+    margin: 8px 0 32px;
+  }
+
+  /* EMOTION QUOTE */
+  .quote {
+    background: rgba(99,130,255,0.06);
+    border-left: 3px solid #6382ff;
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    font-size: 14px; color: #c8d4f0; line-height: 1.6; font-style: italic;
+  }
+  .quote strong { color: #fff; font-style: normal; }
+
+  /* PRICING */
+  .pricing-section {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(99,130,255,0.15);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    margin-bottom: 28px;
+  }
+  .pricing-title {
+    font-size: 13px; font-weight: 700; color: #6b7fa3;
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 18px;
+  }
+  .pricing-row {
+    display: flex; gap: 16px; align-items: stretch; margin-bottom: 18px;
+  }
+  .price-card {
+    flex: 1; background: rgba(99,130,255,0.08);
+    border: 1px solid rgba(99,130,255,0.2);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .price-card.annual {
+    background: rgba(168,85,247,0.08);
+    border-color: rgba(168,85,247,0.25);
+  }
+  .price-val {
+    font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: #fff;
+  }
+  .price-val span { font-size: 14px; font-weight: 500; color: #6b7fa3; }
+  .price-period { font-size: 12px; color: #6b7fa3; margin-top: 3px; }
+  .price-save {
+    display: inline-block; margin-top: 8px;
+    background: rgba(168,85,247,0.15); border-radius: 6px;
+    padding: 3px 10px; font-size: 11px; font-weight: 700; color: #c084fc;
+  }
+  .price-features {
+    display: flex; flex-direction: column; gap: 7px; margin-top: 14px;
+  }
+  .pf { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #8898bb; }
+  .pf-check { color: #22c55e; font-size: 13px; flex-shrink: 0; }
+
+  .cta-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%;
+  }
+  .cta-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: linear-gradient(135deg, #25d366 0%, #1da851 100%);
+    color: #fff; font-weight: 700; font-size: 18px;
+    padding: 18px 32px; border-radius: 14px;
+    text-decoration: none; letter-spacing: -0.01em;
+    box-shadow: 0 8px 32px rgba(37,211,102,0.4);
+    width: 100%; text-align: center;
+  }
+  .cta-btn svg { flex-shrink: 0; }
+  .cta-hint {
+    font-size: 13px; color: #8898bb; text-align: center;
+  }
+
+  .n4 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .files-wrap {
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 14px; padding: 20px;
+  }
+  .files-desc { font-size: 13px; color: #8898bb; line-height: 1.6; margin-bottom: 16px; }
+  .files-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .file-tag {
+    display: flex; flex-direction: column; align-items: center;
+    background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3);
+    border-radius: 10px; padding: 10px 16px; gap: 3px;
+  }
+  .ft { font-size: 14px; font-weight: 800; color: #fbbf24; }
+  .fn { font-size: 10px; color: #a16207; }
+
+  .footer-note {
+    text-align: center; font-size: 11px; color: #3a4460; margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="badge"><span class="badge-dot"></span> <span id="badge-text">🔥 Para quem trabalha com laser, sublimação e personalização</span></div>
+  <script>
+    const badges = [
+      "🔥 Para quem trabalha com laser, sublimação e personalização",
+      "✂️ Para ateliês, gráficas e artesãos criativos",
+      "🎨 Para quem vende personalização e quer crescer"
+    ];
+    let i = 0;
+    const el = document.getElementById("badge-text");
+    setInterval(() => {
+      el.style.opacity = 0;
+      setTimeout(() => {
+        i = (i + 1) % badges.length;
+        el.textContent = badges[i];
+        el.style.opacity = 1;
+      }, 300);
+    }, 3000);
+    el.style.transition = "opacity 0.3s ease";
+  </script>
+
+  <h1 class="headline">
+    <span class="line">Sua vitrine online.</span>
+    <span class="line">Seus clientes <span class="blue">encantados</span>.</span>
+    <span class="line">Seus pedidos <span class="purple">no WhatsApp</span>.</span>
+  </h1>
+
+  <p class="sub">
+    Imagina o cliente entrar no seu link, ver <strong>tudo que você tem</strong> — organizado, bonito, com foto — e já te mandar mensagem pedindo. <strong>Sem você precisar explicar nada.</strong>
+  </p>
+
+  <div class="cta-wrap" style="margin: 8px 0 4px;">
+    <a href="https://wa.me/5562998816808?text=Ol%C3%A1%2C%20quero%20testar%2024h%20gr%C3%A1tis!" class="cta-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Quero testar 24h grátis — falar agora
+    </a>
+    <span class="cta-hint">👆 Clica aqui — abre o WhatsApp direto, é só mandar a mensagem</span>
+  </div>
+
+  <!-- SECTION 1: PAPELARIA -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num n1">1</div>
+      <div>
+        <div class="section-title">Papelaria Digital — 429 temas prontos</div>
+        <div class="section-desc">Kits digitais organizados de A a Z, com fotos reais, por tema e estilo</div>
+      </div>
+    </div>
+    <div class="ss-wrap">
+      <img src="/ss-papelaria.png" alt="Papelaria Digital">
+      <div class="ss-overlay">
+        <div class="ss-text">
+          Papelaria Digital completa
+          <span>429 temas · navegação A-Z · acesso imediato</span>
+        </div>
+        <div class="ss-stat">
+          <div class="ss-stat-val">429</div>
+          <div class="ss-stat-label">temas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote">
+    "Antes eu ficava mandando foto no WhatsApp uma por uma. Agora mando o link e o cliente já escolhe sozinho." <strong>— é o que seus concorrentes ainda não têm.</strong>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 2: CATEGORIAS -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num n2">2</div>
+      <div>
+        <div class="section-title">88 categorias organizadas — laser, sublimação, brindes e mais</div>
+        <div class="section-desc">Cada segmento no lugar certo, com ícone e nome, fácil de navegar</div>
+      </div>
+    </div>
+    <div class="ss-wrap">
+      <img src="/ss-categorias.png" alt="Categorias">
+      <div class="ss-overlay">
+        <div class="ss-text">
+          Todas as categorias do seu negócio
+          <span>88 categorias · ícones personalizados · sempre atualizado</span>
+        </div>
+        <div class="ss-stat purple">
+          <div class="ss-stat-val">88</div>
+          <div class="ss-stat-label">categorias</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote">
+    O cliente não precisa te perguntar <em>"você faz isso?"</em> — ele <strong>já vê que você faz.</strong> Isso fecha venda antes mesmo de você responder.
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 3: CATALOGO -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num n3">3</div>
+      <div>
+        <div class="section-title">Catálogo com +24.000 produtos pesquisáveis</div>
+        <div class="section-desc">Busca, filtro por categoria, paginação — tudo funcionando no celular</div>
+      </div>
+    </div>
+    <div class="ss-wrap">
+      <img src="/ss-catalogo.png" alt="Catálogo">
+      <div class="ss-overlay">
+        <div class="ss-text">
+          Catálogo completo com busca inteligente
+          <span>24.717 produtos · 515 páginas · filtro por categoria</span>
+        </div>
+        <div class="ss-stat green">
+          <div class="ss-stat-val">24k+</div>
+          <div class="ss-stat-label">produtos</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote">
+    Tudo isso <strong>com a sua marca, no seu link</strong>. O cliente não sabe que é uma plataforma — ele acha que você construiu isso tudo. Porque na prática, <strong>é sua vitrine.</strong>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 4: ARQUIVOS DE PRODUÇÃO -->
+  <div class="section">
+    <div class="section-label">
+      <div class="section-num n4">4</div>
+      <div>
+        <div class="section-title">Arquivos prontos — baixe e produza na hora</div>
+        <div class="section-desc">Sem precisar vetorizar do zero — o arquivo já está pronto pra sua máquina</div>
+      </div>
+    </div>
+    <div class="files-wrap">
+      <p class="files-desc">Junto com cada produto do catálogo, você tem acesso aos <strong style="color:#c8d4f0">arquivos de produção para download</strong>. É só baixar e usar direto na sua máquina:</p>
+      <div class="files-grid">
+        <div class="file-tag"><span class="ft">CDR</span><span class="fn">CorelDRAW</span></div>
+        <div class="file-tag"><span class="ft">SVG</span><span class="fn">Universal</span></div>
+        <div class="file-tag"><span class="ft">PDF</span><span class="fn">Impressão</span></div>
+        <div class="file-tag"><span class="ft">PNG</span><span class="fn">Alta resolução</span></div>
+        <div class="file-tag"><span class="ft">AI</span><span class="fn">Illustrator</span></div>
+        <div class="file-tag"><span class="ft">.lbrn</span><span class="fn">LightBurn</span></div>
+        <div class="file-tag"><span class="ft">.studio3</span><span class="fn">Silhouette</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote">
+    Chega de desperdiçar horas vetorizando. <strong>Você já tem o arquivo — é só cortar.</strong>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PRICING -->
+  <div class="pricing-section">
+    <div class="pricing-title">Menos de R$1,57 por dia</div>
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-val">R$47<span>/mês</span></div>
+        <div class="price-period">Mensal · cancele quando quiser</div>
+        <div class="price-features">
+          <div class="pf"><span class="pf-check">✓</span> Vitrine completa com sua marca</div>
+          <div class="pf"><span class="pf-check">✓</span> +24.000 produtos no catálogo</div>
+          <div class="pf"><span class="pf-check">✓</span> Papelaria digital + calculadora</div>
+          <div class="pf"><span class="pf-check">✓</span> Pedidos direto no WhatsApp</div>
+        </div>
+      </div>
+      <div class="price-card annual">
+        <div class="price-val">R$300<span>/ano</span></div>
+        <div class="price-period">Anual · melhor custo-benefício</div>
+        <div class="price-save">Economize R$264 por ano 🎉</div>
+        <div class="price-features">
+          <div class="pf"><span class="pf-check">✓</span> Tudo do plano mensal</div>
+          <div class="pf"><span class="pf-check">✓</span> Prioridade em novidades</div>
+          <div class="pf"><span class="pf-check">✓</span> Menos que R$25/mês</div>
+        </div>
+      </div>
+    </div>
+    <div class="cta-wrap">
+      <a href="https://wa.me/5562998816808?text=Ol%C3%A1%2C%20quero%20testar%2024h%20gr%C3%A1tis!" class="cta-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Quero testar 24h grátis — falar agora
+      </a>
+      <span class="cta-hint">👆 Clica aqui — abre o WhatsApp direto, é só mandar a mensagem</span>
+    </div>
+    <div class="footer-note">Sem taxa de setup · Ativa em menos de 24h · Suporte via WhatsApp</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,90 @@
+// ============================================================
+// middleware.ts — Proteção de rotas + lookup do tenant
+// ============================================================
+
+import { createServerClient } from '@supabase/ssr'
+import { NextResponse, type NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({ request })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return request.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          )
+          supabaseResponse = NextResponse.next({ request })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { pathname } = request.nextUrl
+
+  // ── Rotas superadmin: requer autenticação ──────────────────
+  if (pathname.startsWith('/superadmin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    // verifica se é superadmin
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_superadmin')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.is_superadmin) {
+      return NextResponse.redirect(new URL('/login?error=unauthorized', request.url))
+    }
+  }
+
+  // ── Rotas tenant admin: requer autenticação ────────────────
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    // verifica se pertence a algum tenant
+    const { data: tenantUser } = await supabase
+      .from('tenant_users')
+      .select('tenant_id, role')
+      .eq('user_id', user.id)
+      .eq('ativo', true)
+      .single()
+
+    if (!tenantUser) {
+      return NextResponse.redirect(new URL('/login?error=no-tenant', request.url))
+    }
+  }
+
+  // ── Redireciona / autenticado para o painel correto ────────
+  if (pathname === '/login' && user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_superadmin')
+      .eq('id', user.id)
+      .single()
+
+    if (profile?.is_superadmin) {
+      return NextResponse.redirect(new URL('/superadmin', request.url))
+    }
+    return NextResponse.redirect(new URL('/admin', request.url))
+  }
+
+  return supabaseResponse
+}
+
+export const config = {
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+}

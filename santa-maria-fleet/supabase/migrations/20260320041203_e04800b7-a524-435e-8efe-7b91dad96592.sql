@@ -1,0 +1,1 @@
+ALTER TABLE public.settings ADD COLUMN permitir_edicao_km boolean NOT NULL DEFAULT false;

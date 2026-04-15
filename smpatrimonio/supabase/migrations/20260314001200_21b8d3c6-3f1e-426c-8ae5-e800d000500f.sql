@@ -1,0 +1,1 @@
+ALTER TABLE public.items ADD COLUMN numero_anvisa text DEFAULT NULL;

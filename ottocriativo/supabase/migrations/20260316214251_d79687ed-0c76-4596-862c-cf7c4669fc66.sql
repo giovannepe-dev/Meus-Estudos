@@ -1,0 +1,1 @@
+UPDATE site_settings SET whatsapp = '5562998816808' WHERE whatsapp = '62998816808';

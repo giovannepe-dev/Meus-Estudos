@@ -1,0 +1,124 @@
+// ============================================================
+// src/lib/validations/tenant.ts
+// ============================================================
+
+import { z } from 'zod'
+
+export const tenantSchema = z.object({
+  slug: z
+    .string()
+    .min(2, 'Slug deve ter pelo menos 2 caracteres')
+    .max(50)
+    .regex(/^[a-z0-9-]+$/, 'Slug deve conter apenas letras minúsculas, números e hífens'),
+  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100),
+  status: z.enum(['active', 'inactive', 'suspended', 'trial']),
+  plan: z.enum(['free', 'starter', 'professional', 'enterprise']),
+})
+
+export const tenantSettingsSchema = z.object({
+  nome_site: z.string().min(2).max(100),
+  slogan: z.string().max(200).optional().or(z.literal('')),
+  descricao: z.string().max(1000).optional().or(z.literal('')),
+  whatsapp: z
+    .string()
+    .regex(/^\d{10,15}$/, 'WhatsApp deve conter apenas números (10-15 dígitos)')
+    .optional()
+    .or(z.literal('')),
+  instagram: z.string().max(50).optional().or(z.literal('')),
+  cor_destaque: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, 'Cor deve ser um hex válido (ex: #7C3AED)'),
+  mostrar_preco: z.boolean(),
+  mensagem_padrao: z.string().min(5).max(500),
+  meta_title: z.string().max(60).optional().or(z.literal('')),
+  meta_description: z.string().max(160).optional().or(z.literal('')),
+})
+
+export type TenantSchema = z.infer<typeof tenantSchema>
+export type TenantSettingsSchema = z.infer<typeof tenantSettingsSchema>
+
+
+// ============================================================
+// src/lib/validations/category.ts
+// ============================================================
+
+import { z } from 'zod'
+
+export const categorySchema = z.object({
+  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(100),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/, 'Slug inválido')
+    .optional()
+    .or(z.literal('')),
+  emoji: z.string().max(10).optional().or(z.literal('')),
+  descricao: z.string().max(500).optional().or(z.literal('')),
+  imagem_url: z.string().url('URL inválida').optional().or(z.literal('')),
+  ordem: z.number().int().min(0).default(0),
+  ativa: z.boolean().default(true),
+})
+
+export type CategorySchema = z.infer<typeof categorySchema>
+
+
+// ============================================================
+// src/lib/validations/product.ts
+// ============================================================
+
+import { z } from 'zod'
+
+export const productSchema = z.object({
+  categoria_id: z.string().uuid('Categoria inválida').optional().or(z.literal('')),
+  nome: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres').max(200),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9-]+$/, 'Slug inválido')
+    .optional()
+    .or(z.literal('')),
+  descricao: z.string().max(2000).optional().or(z.literal('')),
+  arquivo: z.string().max(200).optional().or(z.literal('')),
+  imagem_url: z.string().url('URL inválida').optional().or(z.literal('')),
+  preco: z
+    .number()
+    .min(0, 'Preço deve ser positivo')
+    .max(99999.99)
+    .optional()
+    .nullable(),
+  destaque: z.boolean().default(false),
+  personalizavel: z.boolean().default(false),
+  novidade: z.boolean().default(false),
+  ativo: z.boolean().default(true),
+  ordem: z.number().int().min(0).default(0),
+  tags: z.array(z.string().min(1).max(50)).max(20).default([]),
+})
+
+export type ProductSchema = z.infer<typeof productSchema>
+
+
+// ============================================================
+// src/lib/validations/auth.ts
+// ============================================================
+
+import { z } from 'zod'
+
+export const loginSchema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
+})
+
+export const registerSchema = z.object({
+  full_name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
+  email: z.string().email('Email inválido'),
+  password: z
+    .string()
+    .min(8, 'Senha deve ter pelo menos 8 caracteres')
+    .regex(/[A-Z]/, 'Deve conter pelo menos uma letra maiúscula')
+    .regex(/[0-9]/, 'Deve conter pelo menos um número'),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+})
+
+export type LoginSchema = z.infer<typeof loginSchema>
+export type RegisterSchema = z.infer<typeof registerSchema>
